@@ -1,0 +1,26 @@
+{
+  "name": "nreseed",
+  "version": "0.0.1",
+  "license": "MIT",
+  "author": "Ivan Prisiazhnyi, @JohnKoepi, /sitano",
+  "description": "Reseed node.js PRNG -s",
+  "keywords": [
+    "fork",
+    "reseed",
+    "seed",
+    "prng",
+    "random",
+    "rnd",
+    "entropy"
+  ],
+  "main": "seeder.js",
+  "private": false,
+  "dependencies": {
+    "bindings": "~1.2.1",
+    "node-addon-api": "^1.0.0"
+  },
+  "scripts": {
+    "test": "node seeder_test.js"
+  },
+  "gypfile": true
+}
