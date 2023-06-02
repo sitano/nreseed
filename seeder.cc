@@ -1,7 +1,12 @@
 #include <napi.h>
+#include <node.h>
 
-#include <unistd.h>
+#include <chrono>
+#include <string>
+#include <sstream>
+
 #include <sys/wait.h>
+#include <unistd.h>
 
 #include <openssl/rand.h>
 
@@ -25,14 +30,33 @@ void Reseed_OpenSSL_RAND(const Napi::CallbackInfo& info) {
   }
 
   // We don't have any entropy data here, so kindly ask OpenSSL impl to get
-  // us some.
+  // us some. We could perform RAND_seed(getpid()) as it is advertised in
+  // Random_fork-satefy, but in PID namespaces all processes will be having
+  // the same pid_t with very high probability (around pid_t == 1).
   if (!EVP_RAND_reseed(drbg, 0, NULL, 0, NULL, 0)) {
     Napi::TypeError::New(env, "EVP_RAND_reseed failed").ThrowAsJavaScriptException();
   }
 }
 
+// I don't know how to call MathRandom::ResetContext() from here. As well as
+// reset native_context.math_random_state() accessed from
+// MathRandom::RefillCache(). MathRandom cache is resete during snapshot
+// serialization but thats too expensive. We could hijack Refill function, but
+// it's easier just to replace whole Math.random().
+void Reseed_Math_RAND(const Napi::CallbackInfo& info) {
+  auto now = std::chrono::high_resolution_clock::now();
+
+  std::stringstream ss;
+  ss << "--random_seed ";
+  ss << now.time_since_epoch().count();
+
+  const std::string s(ss.str());
+  v8::V8::SetFlagsFromString(s.c_str());
+}
+
 void Reseed(const Napi::CallbackInfo& info) {
   Reseed_OpenSSL_RAND(info);
+  Reseed_Math_RAND(info);
 }
 
 // fork(2) for test purposes only
