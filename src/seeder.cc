@@ -10,6 +10,8 @@
 
 #include <openssl/rand.h>
 
+#include "prng.h"
+
 // This one covers OpenSSL RAND/EVP/ossl_prov_drbg_generate,
 // or reseeds Node.js's Crypto.getRandomBytes()/node::crypto::CSPRNG.
 //
@@ -106,6 +108,8 @@ Napi::Value WaitPid(const Napi::CallbackInfo& info) {
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "reseed"), Napi::Function::New(env, Reseed));
 
+  PRNG::Init(env, exports);
+
   // internal services for tests
   exports.Set(Napi::String::New(env, "fork"), Napi::Function::New(env, Fork));
   exports.Set(Napi::String::New(env, "getpid"), Napi::Function::New(env, GetPid));
@@ -114,4 +118,4 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   return exports;
 }
 
-NODE_API_MODULE(reseed, Init)
+NODE_API_MODULE(nreseed, Init)

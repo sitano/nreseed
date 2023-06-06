@@ -4,7 +4,11 @@
       "target_name": "nreseed",
       "cflags!": [ "-fno-exceptions" ],
       "cflags_cc!": [ "-fno-exceptions" ],
-      "sources": [ "src/seeder.cc" ],
+      "sources": [
+        "src/seeder.cc",
+        "src/prng.cc",
+        "src/utils/random-number-generator.cc"
+      ],
       "include_dirs": [
         "<!@(node -p \"require('node-addon-api').include\")"
       ],

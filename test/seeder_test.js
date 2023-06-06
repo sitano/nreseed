@@ -7,6 +7,9 @@ const waitpid = seeder.internal.waitpid;
 
 console.log("start");
 
+console.log(`#${getpid()} ` + (new seeder.PRNG()).Random());
+console.log(`#${getpid()} ` + (new seeder.PRNG()).Random());
+
 Math.random();
 // load some initial entropy
 const a = new Uint32Array(1);
