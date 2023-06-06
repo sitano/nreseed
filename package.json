@@ -13,14 +13,14 @@
     "rnd",
     "entropy"
   ],
-  "main": "seeder.js",
+  "main": "pkg/seeder.js",
   "private": false,
   "dependencies": {
     "bindings": "~1.2.1",
     "node-addon-api": "^1.0.0"
   },
   "scripts": {
-    "test": "node seeder_test.js"
+    "test": "node test/seeder_test.js"
   },
   "gypfile": true
 }

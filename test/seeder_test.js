@@ -1,4 +1,4 @@
-var seeder = require('./seeder');
+var seeder = require('../pkg/seeder');
 var assert = require('assert');
 
 const fork = seeder.internal.fork;
