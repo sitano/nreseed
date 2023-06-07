@@ -1,46 +1,35 @@
 var seeder = require('../pkg/seeder');
 var assert = require('assert');
 
-const fork = seeder.internal.fork;
-const getpid = seeder.internal.getpid;
-const waitpid = seeder.internal.waitpid;
+console.log("PRNG.random() = " + (new seeder.PRNG()).random());
+console.log("PRNG.random() = " + (new seeder.PRNG()).random());
 
-console.log("start");
+const a = new seeder.PRNG();
+const b = new seeder.PRNG(0);
 
-console.log(`#${getpid()} ` + (new seeder.PRNG()).Random());
-console.log(`#${getpid()} ` + (new seeder.PRNG()).Random());
+function must_be_eq(l, r)  { assert.equal(l, r); return l; }
+function must_be_not(l, r) { assert.notEqual(l, r); return l; }
 
-Math.random();
-// load some initial entropy
-const a = new Uint32Array(1);
-crypto.getRandomValues(a);
+console.log("PRNG() is well seeded: " + must_be_not(a.random(), (new seeder.PRNG()).random()));
 
-function test() {
-  console.log(`#${getpid()} Math.random() = ${Math.random()}`);
-  const a = new Uint32Array(1);
-  crypto.getRandomValues(a);
-  console.log(`#${getpid()} crypto.getRandomValues() = ${a}`);
-}
+console.log("a.random() = " + a.random());
+console.log("a.random() = " + a.random());
+console.log("b.random(fixed) = " + must_be_eq(b.random(), 0.39339363837962904));
+console.log("b.random(fixed) = " + must_be_eq(b.random(), 0.39339364003432853));
 
-function test1() {
-  test();
-  seeder.reseed();
-  console.log(`#${getpid()} reseeded`);
-  test();
-}
+b.setSeed(1);
 
-// however, see https://wiki.openssl.org/index.php/Random_fork-safety.
-const pid = fork();
+console.log("b.setSeed(1)");
+console.log("b.random(fixed) = " + must_be_eq(b.random(), 0.7662037068107435));
+console.log("b.random(fixed) = " + must_be_eq(b.random(), 0.0562947746566671));
 
-if (pid == 0) {
-  test1();
-  console.log(`#${getpid()} child done`);
-  process.exit(0);
-}
+b.setSeed(0);
 
-if (waitpid(pid) != 0) {
-  assert("waitpid didn't do well");
-}
+console.log("b.setSeed(0)");
+console.log("b.random(fixed) = " + must_be_eq(b.random(), 0.39339363837962904));
+console.log("b.random(fixed) = " + must_be_eq(b.random(), 0.39339364003432853));
 
-test1();
-console.log(`#${getpid()} parent done`);
+a.reseed(); const c1 = a.random();
+a.reseed(); const c2 = a.random();
+console.log("a.reseed()");
+console.log("a.random() + reseed() + a.random() = " + must_be_not(c1, c2) + " != " + c2);
