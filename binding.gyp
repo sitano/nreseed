@@ -7,6 +7,7 @@
       "sources": [
         "src/seeder.cc",
         "src/prng.cc",
+        "src/utils/time.cc",
         "src/utils/random-number-generator.cc"
       ],
       "include_dirs": [

@@ -7,6 +7,7 @@
 // FIXME: implement DCHECK_* and CHECK_ assertions.
 
 #include "random-number-generator.h"
+#include "time.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,13 +21,6 @@ namespace base {
 
 inline constexpr bool IsPowerOfTwo(int value) {
   return value > 0 && (value & (value - 1)) == 0;
-}
-
-
-// FIXME: enrich with ticks?
-inline int64_t NowFromSystemTime() {
-  auto now = std::chrono::high_resolution_clock::now();
-  return now.time_since_epoch().count();
 }
 
 
@@ -201,9 +195,9 @@ void RandomNumberGenerator::Reseed() {
   // an entropy source using v8::V8::SetEntropySource(),
   // which provides reasonable entropy, see:
   // https://code.google.com/p/v8/issues/detail?id=2905
+  // We don't support external entropy source in this version.
   int64_t seed = NowFromSystemTime() << 24;
-  // FIXME: int64_t seed = Time::NowFromSystemTime().ToInternalValue() << 24;
-  // FIXME: seed ^= TimeTicks::Now().ToInternalValue();
+  seed ^= TimeTicksNow();
   SetSeed(seed);
 #endif  // V8_OS_CYGWIN || V8_OS_WIN
 
