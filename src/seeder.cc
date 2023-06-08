@@ -1,6 +1,7 @@
 #include <napi.h>
 #include <node.h>
 
+#include <array>
 #include <chrono>
 #include <string>
 #include <sstream>
@@ -11,6 +12,9 @@
 #include <openssl/rand.h>
 
 #include "prng.h"
+
+#include "utils/time.h"
+#include "utils/bit_cast.h"
 
 // This one covers OpenSSL RAND/EVP/ossl_prov_drbg_generate,
 // or reseeds Node.js's Crypto.getRandomBytes()/node::crypto::CSPRNG.
@@ -31,11 +35,15 @@ void Reseed_OpenSSL_RAND(const Napi::CallbackInfo& info) {
     return;
   }
 
+  int64_t addin = v8::base::NowFromSystemTime() << 24;
+  addin ^= v8::base::TimeTicksNow();
+
   // We don't have any entropy data here, so kindly ask OpenSSL impl to get
   // us some. We could perform RAND_seed(getpid()) as it is advertised in
   // Random_fork-satefy, but in PID namespaces all processes will be having
   // the same pid_t with very high probability (around pid_t == 1).
-  if (!EVP_RAND_reseed(drbg, 0, NULL, 0, NULL, 0)) {
+  auto addin_buf = v8::base::bit_cast<std::array<unsigned char, 8>>(addin);
+  if (!EVP_RAND_reseed(drbg, 0, NULL, 0, addin_buf.data(), 8)) {
     Napi::TypeError::New(env, "EVP_RAND_reseed failed").ThrowAsJavaScriptException();
   }
 }
