@@ -1,6 +1,8 @@
 var seeder = require('../pkg/seeder');
 var assert = require('assert');
 
+// --- test PRNG() with fixed seeds
+
 console.log("PRNG.random() = " + (new seeder.PRNG()).random());
 console.log("PRNG.random() = " + (new seeder.PRNG()).random());
 
@@ -33,3 +35,17 @@ a.reseed(); const c1 = a.random();
 a.reseed(); const c2 = a.random();
 console.log("a.reseed()");
 console.log("a.random() + reseed() + a.random() = " + must_be_not(c1, c2) + " != " + c2);
+
+// --- global reseed() does not produce fixed entropy
+
+seeder.reseed();
+const t1 = Math.random();
+const t2 = Math.random();
+assert.notEqual(t1, t2);
+
+seeder.reseed();
+const t3 = Math.random();
+const t4 = Math.random();
+assert.notEqual(t1, t3);
+assert.notEqual(t2, t4);
+assert.notEqual(t3, t4);
