@@ -3,11 +3,10 @@
 // found in the LICENSE file.
 //
 // Modified by Ivan Prisyazhyy <john.koepi@gmail.com>
-//
-// FIXME: implement DCHECK_* and CHECK_ assertions.
 
 #include "random-number-generator.h"
 #include "time.h"
+#include "macros.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -25,7 +24,7 @@ inline constexpr bool IsPowerOfTwo(int value) {
 
 
 int RandomNumberGenerator::NextInt(int max) {
-  // DCHECK_LT(0, max);
+  DCHECK_LT(0, max);
 
   // Fast path if max is a power of 2.
   if (IsPowerOfTwo(max)) {
@@ -74,7 +73,7 @@ static std::vector<uint64_t> ComplementSample(
 
 std::vector<uint64_t> RandomNumberGenerator::NextSample(uint64_t max,
                                                         size_t n) {
-  // CHECK_LE(n, max);
+  CHECK_LE(n, max);
 
   if (n == 0) {
     return std::vector<uint64_t>();
@@ -88,7 +87,7 @@ std::vector<uint64_t> RandomNumberGenerator::NextSample(uint64_t max,
   size_t counter = 0;
   while (selected.size() != smaller_part && counter / 3 < smaller_part) {
     uint64_t x = static_cast<uint64_t>(NextDouble() * max);
-    // CHECK_LT(x, max);
+    CHECK_LT(x, max);
 
     selected.insert(x);
     counter++;
@@ -107,7 +106,7 @@ std::vector<uint64_t> RandomNumberGenerator::NextSample(uint64_t max,
 
 std::vector<uint64_t> RandomNumberGenerator::NextSampleSlow(
     uint64_t max, size_t n, const std::unordered_set<uint64_t>& excluded) {
-  // CHECK_GE(max - excluded.size(), n);
+  CHECK_GE(max - excluded.size(), n);
 
   std::vector<uint64_t> result;
   result.reserve(max - excluded.size());
@@ -127,7 +126,7 @@ std::vector<uint64_t> RandomNumberGenerator::NextSampleSlow(
   // larget_part.
   while (result.size() != larger_part && result.size() > n) {
     size_t x = static_cast<size_t>(NextDouble() * result.size());
-    // CHECK_LT(x, result.size());
+    CHECK_LT(x, result.size());
 
     std::swap(result[x], result.back());
     result.pop_back();
@@ -141,8 +140,8 @@ std::vector<uint64_t> RandomNumberGenerator::NextSampleSlow(
 }
 
 int RandomNumberGenerator::Next(int bits) {
-  // DCHECK_LT(0, bits);
-  // DCHECK_GE(32, bits);
+  DCHECK_LT(0, bits);
+  DCHECK_GE(32, bits);
   XorShift128(&state0_, &state1_);
   return static_cast<int>((state0_ + state1_) >> (64 - bits));
 }
@@ -152,7 +151,7 @@ void RandomNumberGenerator::SetSeed(int64_t seed) {
   initial_seed_ = seed;
   state0_ = MurmurHash3(base::bit_cast<uint64_t>(seed));
   state1_ = MurmurHash3(~state0_);
-  // CHECK(state0_ != 0 || state1_ != 0);
+  CHECK(state0_ != 0 || state1_ != 0);
 }
 
 
@@ -162,9 +161,9 @@ void RandomNumberGenerator::Reseed() {
   // https://code.google.com/p/v8/issues/detail?id=2905
   unsigned first_half, second_half;
   errno_t result = rand_s(&first_half);
-  // DCHECK_EQ(0, result);
+  DCHECK_EQ(0, result);
   result = rand_s(&second_half);
-  // DCHECK_EQ(0, result);
+  DCHECK_EQ(0, result);
   USE(result);
   SetSeed((static_cast<int64_t>(first_half) << 32) + second_half);
 #elif V8_OS_DARWIN || V8_OS_FREEBSD || V8_OS_OPENBSD

@@ -16,8 +16,8 @@ namespace v8 {
 namespace base {
 
 int64_t FromTimeval(struct timeval tv) {
-  // DCHECK_GE(tv.tv_usec, 0);
-  // DCHECK(tv.tv_usec < static_cast<suseconds_t>(TimeConstants::kMicrosecondsPerSecond));
+  DCHECK_GE(tv.tv_usec, 0);
+  DCHECK(tv.tv_usec < static_cast<suseconds_t>(TimeConstants::kMicrosecondsPerSecond));
   if (tv.tv_usec == 0 && tv.tv_sec == 0) {
     return 0;
   }
@@ -35,7 +35,7 @@ int64_t FromTimeval(struct timeval tv) {
 int64_t NowFromSystemTime() {
   struct timeval tv;
   int result = gettimeofday(&tv, nullptr);
-  // DCHECK_EQ(0, result);
+  DCHECK_EQ(0, result);
   USE(result);
   return FromTimeval(tv);
 }
@@ -70,11 +70,11 @@ int64_t ClockNow(clockid_t clk_id) {
   }
   // Multiplying the seconds by {kMicrosecondsPerSecond}, and adding something
   // in [0, kMicrosecondsPerSecond) must result in a valid {int64_t}.
-  // static constexpr int64_t kSecondsLimit =
-  //     (std::numeric_limits<int64_t>::max() /
-  //      TimeConstants::kMicrosecondsPerSecond) -
-  //     1;
-  // CHECK_GT(kSecondsLimit, ts.tv_sec);
+  static constexpr int64_t kSecondsLimit =
+      (std::numeric_limits<int64_t>::max() /
+       TimeConstants::kMicrosecondsPerSecond) -
+      1;
+  CHECK_GT(kSecondsLimit, ts.tv_sec);
   int64_t result = int64_t{ts.tv_sec} * TimeConstants::kMicrosecondsPerSecond;
   result += (ts.tv_nsec / TimeConstants::kNanosecondsPerMicrosecond);
   return result;
@@ -101,7 +101,7 @@ bool IsHighResolutionTimer(clockid_t clk_id) {
   // Currently this is only needed for CLOCK_MONOTONIC. If other clocks need
   // to be checked, care must be taken to support all platforms correctly;
   // see ClockNow() above for precedent.
-  // DCHECK_EQ(clk_id, CLOCK_MONOTONIC);
+  DCHECK_EQ(clk_id, CLOCK_MONOTONIC);
   int64_t previous = NanosecondsNow();
   // There should be enough attempts to make the loop run for more than one
   // microsecond if the early return is not taken -- the elapsed time can't
