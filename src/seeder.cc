@@ -69,6 +69,7 @@ void Reseed(const Napi::CallbackInfo& info) {
   Reseed_Math_RAND(info);
 }
 
+
 // fork(2) for test purposes only
 Napi::Value Fork(const Napi::CallbackInfo& info) {
   Napi::Env env = info.Env();
@@ -113,6 +114,13 @@ Napi::Value WaitPid(const Napi::CallbackInfo& info) {
   return Napi::Number::New(env, wstatus);
 }
 
+
+// for test purposes only
+Napi::Value GetTimeTicksNow(const Napi::CallbackInfo& info) {
+  return Napi::Number::New(info.Env(), v8::base::TimeTicksNow());
+}
+
+
 Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "reseed"), Napi::Function::New(env, Reseed));
 
@@ -122,6 +130,7 @@ Napi::Object Init(Napi::Env env, Napi::Object exports) {
   exports.Set(Napi::String::New(env, "fork"), Napi::Function::New(env, Fork));
   exports.Set(Napi::String::New(env, "getpid"), Napi::Function::New(env, GetPid));
   exports.Set(Napi::String::New(env, "waitpid"), Napi::Function::New(env, WaitPid));
+  exports.Set(Napi::String::New(env, "ticks"), Napi::Function::New(env, GetTimeTicksNow));
 
   return exports;
 }

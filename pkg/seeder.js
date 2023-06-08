@@ -8,7 +8,7 @@ module.exports.internal = addon;
 module.exports.reseed = function() {
   addon.reseed();
 
-  let prng = new addon.PRNG();
+  var prng = new addon.PRNG();
   Math.random = function() {
     return prng.random();
   };

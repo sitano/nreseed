@@ -7,6 +7,8 @@
 #include "time.h"
 #include "macros.h"
 
+// unistd required for _POSIX_MONOTONIC_CLOCK
+#include <unistd.h>
 #include <sys/time.h>
 #include <time.h>
 
@@ -68,10 +70,10 @@ int64_t ClockNow(clockid_t clk_id) {
   }
   // Multiplying the seconds by {kMicrosecondsPerSecond}, and adding something
   // in [0, kMicrosecondsPerSecond) must result in a valid {int64_t}.
-  static constexpr int64_t kSecondsLimit =
-      (std::numeric_limits<int64_t>::max() /
-       TimeConstants::kMicrosecondsPerSecond) -
-      1;
+  // static constexpr int64_t kSecondsLimit =
+  //     (std::numeric_limits<int64_t>::max() /
+  //      TimeConstants::kMicrosecondsPerSecond) -
+  //     1;
   // CHECK_GT(kSecondsLimit, ts.tv_sec);
   int64_t result = int64_t{ts.tv_sec} * TimeConstants::kMicrosecondsPerSecond;
   result += (ts.tv_nsec / TimeConstants::kNanosecondsPerMicrosecond);
