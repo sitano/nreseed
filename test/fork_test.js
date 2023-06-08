@@ -2,10 +2,24 @@
 
 var seeder = require('../pkg/seeder');
 var assert = require('assert');
+var crypto;
+
+try {
+  crypto = require('node:crypto');
+} catch (err) {
+  console.error('crypto support is disabled!');
+}
 
 let fork = seeder.internal.fork;
 let getpid = seeder.internal.getpid;
 let waitpid = seeder.internal.waitpid;
+let getRandomValues = function(a) {
+  if (crypto) {
+    return crypto.getRandomValues(a);
+  }
+
+  return undefined;
+}
 
 function log(...args) {
   let s = `#${getpid()} `;
@@ -21,12 +35,12 @@ Math.random();
 
 // load some initial entropy
 const a = new Uint32Array(1);
-crypto.getRandomValues(a);
+getRandomValues(a);
 
 function test() {
   log("Math.random() = ", Math.random());
   const a = new Uint32Array(1);
-  crypto.getRandomValues(a);
+  getRandomValues(a);
   log("crypto.getRandomValues() = ", a);
 }
 
